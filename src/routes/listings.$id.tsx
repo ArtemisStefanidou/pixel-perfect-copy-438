@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageShell } from "@/components/page-shell";
-import { LISTINGS } from "@/lib/mock-data";
+import { LISTINGS, type Listing } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/listings/$id")({
   component: ListingDetail,
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/listings/$id")({
 const APP_KEY = "skillsbox.applications";
 
 function ListingDetail() {
-  const { listing } = Route.useLoaderData();
+  const { listing } = Route.useLoaderData() as { listing: Listing };
   const navigate = useNavigate();
   const [applied, setApplied] = useState(false);
 
