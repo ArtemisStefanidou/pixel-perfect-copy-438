@@ -8,11 +8,19 @@ import "@fontsource/outfit/600.css";
 import "@fontsource/outfit/700.css";
 import "./styles.css";
 
-import { RouterProvider } from "@tanstack/react-router";
+import { QueryClient } from "@tanstack/react-query";
+import { createRouter, RouterProvider } from "@tanstack/react-router";
 import ReactDOM from "react-dom/client";
-import { getRouter } from "./router";
+import { routeTree } from "./routeTree.gen";
 
-const router = getRouter();
+const queryClient = new QueryClient();
+const router = createRouter({
+  routeTree,
+  context: { queryClient },
+  basepath: "/pixel-perfect-copy-438",
+  scrollRestoration: true,
+  defaultPreloadStaleTime: 0,
+});
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <RouterProvider router={router} />

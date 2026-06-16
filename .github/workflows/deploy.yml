@@ -29,6 +29,8 @@ jobs:
 
       - run: bunx vite build --config vite.spa.config.ts
 
+      - run: cp dist-spa/index.html dist-spa/404.html
+
       - uses: actions/configure-pages@v4
 
       - uses: actions/upload-pages-artifact@v3
