@@ -12,11 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ListingsRouteImport } from './routes/listings'
+import { Route as LearnRouteImport } from './routes/learn'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CvBuilderRouteImport } from './routes/cv-builder'
 import { Route as ApplicationsRouteImport } from './routes/applications'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SmeNewListingRouteImport } from './routes/sme.new-listing'
 import { Route as ListingsIdRouteImport } from './routes/listings.$id'
+import { Route as LearnIdRouteImport } from './routes/learn.$id'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -31,6 +34,11 @@ const LoginRoute = LoginRouteImport.update({
 const ListingsRoute = ListingsRouteImport.update({
   id: '/listings',
   path: '/listings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearnRoute = LearnRouteImport.update({
+  id: '/learn',
+  path: '/learn',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -53,10 +61,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SmeNewListingRoute = SmeNewListingRouteImport.update({
+  id: '/sme/new-listing',
+  path: '/sme/new-listing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ListingsIdRoute = ListingsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => ListingsRoute,
+} as any)
+const LearnIdRoute = LearnIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => LearnRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -64,20 +82,26 @@ export interface FileRoutesByFullPath {
   '/applications': typeof ApplicationsRoute
   '/cv-builder': typeof CvBuilderRoute
   '/dashboard': typeof DashboardRoute
+  '/learn': typeof LearnRouteWithChildren
   '/listings': typeof ListingsRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/learn/$id': typeof LearnIdRoute
   '/listings/$id': typeof ListingsIdRoute
+  '/sme/new-listing': typeof SmeNewListingRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/applications': typeof ApplicationsRoute
   '/cv-builder': typeof CvBuilderRoute
   '/dashboard': typeof DashboardRoute
+  '/learn': typeof LearnRouteWithChildren
   '/listings': typeof ListingsRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/learn/$id': typeof LearnIdRoute
   '/listings/$id': typeof ListingsIdRoute
+  '/sme/new-listing': typeof SmeNewListingRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -85,10 +109,13 @@ export interface FileRoutesById {
   '/applications': typeof ApplicationsRoute
   '/cv-builder': typeof CvBuilderRoute
   '/dashboard': typeof DashboardRoute
+  '/learn': typeof LearnRouteWithChildren
   '/listings': typeof ListingsRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/learn/$id': typeof LearnIdRoute
   '/listings/$id': typeof ListingsIdRoute
+  '/sme/new-listing': typeof SmeNewListingRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -97,30 +124,39 @@ export interface FileRouteTypes {
     | '/applications'
     | '/cv-builder'
     | '/dashboard'
+    | '/learn'
     | '/listings'
     | '/login'
     | '/register'
+    | '/learn/$id'
     | '/listings/$id'
+    | '/sme/new-listing'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/applications'
     | '/cv-builder'
     | '/dashboard'
+    | '/learn'
     | '/listings'
     | '/login'
     | '/register'
+    | '/learn/$id'
     | '/listings/$id'
+    | '/sme/new-listing'
   id:
     | '__root__'
     | '/'
     | '/applications'
     | '/cv-builder'
     | '/dashboard'
+    | '/learn'
     | '/listings'
     | '/login'
     | '/register'
+    | '/learn/$id'
     | '/listings/$id'
+    | '/sme/new-listing'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -128,9 +164,11 @@ export interface RootRouteChildren {
   ApplicationsRoute: typeof ApplicationsRoute
   CvBuilderRoute: typeof CvBuilderRoute
   DashboardRoute: typeof DashboardRoute
+  LearnRoute: typeof LearnRouteWithChildren
   ListingsRoute: typeof ListingsRouteWithChildren
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
+  SmeNewListingRoute: typeof SmeNewListingRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -154,6 +192,13 @@ declare module '@tanstack/react-router' {
       path: '/listings'
       fullPath: '/listings'
       preLoaderRoute: typeof ListingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn': {
+      id: '/learn'
+      path: '/learn'
+      fullPath: '/learn'
+      preLoaderRoute: typeof LearnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -184,6 +229,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sme/new-listing': {
+      id: '/sme/new-listing'
+      path: '/sme/new-listing'
+      fullPath: '/sme/new-listing'
+      preLoaderRoute: typeof SmeNewListingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/listings/$id': {
       id: '/listings/$id'
       path: '/$id'
@@ -191,8 +243,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ListingsIdRouteImport
       parentRoute: typeof ListingsRoute
     }
+    '/learn/$id': {
+      id: '/learn/$id'
+      path: '/$id'
+      fullPath: '/learn/$id'
+      preLoaderRoute: typeof LearnIdRouteImport
+      parentRoute: typeof LearnRoute
+    }
   }
 }
+
+interface LearnRouteChildren {
+  LearnIdRoute: typeof LearnIdRoute
+}
+
+const LearnRouteChildren: LearnRouteChildren = {
+  LearnIdRoute: LearnIdRoute,
+}
+
+const LearnRouteWithChildren = LearnRoute._addFileChildren(LearnRouteChildren)
 
 interface ListingsRouteChildren {
   ListingsIdRoute: typeof ListingsIdRoute
@@ -211,9 +280,11 @@ const rootRouteChildren: RootRouteChildren = {
   ApplicationsRoute: ApplicationsRoute,
   CvBuilderRoute: CvBuilderRoute,
   DashboardRoute: DashboardRoute,
+  LearnRoute: LearnRouteWithChildren,
   ListingsRoute: ListingsRouteWithChildren,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
+  SmeNewListingRoute: SmeNewListingRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
