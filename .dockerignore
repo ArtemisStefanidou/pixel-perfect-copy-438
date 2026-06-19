@@ -1,0 +1,9 @@
+node_modules
+dist
+dist-spa
+dist-cloudrun
+.git
+.github
+.vscode
+*.log
+.DS_Store

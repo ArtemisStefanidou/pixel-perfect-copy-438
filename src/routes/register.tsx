@@ -8,6 +8,12 @@ export const Route = createFileRoute("/register")({
   head: () => ({ meta: [{ title: "Create account — SkillsBox" }] }),
 });
 
+const ROLE_META: Record<Role, { label: string; hint: string }> = {
+  student: { label: "Student", hint: "Find internships and build your Europass CV." },
+  sme: { label: "Company / SME", hint: "Post listings and review applicants." },
+  admin: { label: "Administrator", hint: "Manage users, listings, and platform health." },
+};
+
 function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -33,8 +39,8 @@ function RegisterPage() {
         <form onSubmit={onSubmit} className="mt-10 space-y-6 rounded-2xl border border-border bg-surface p-8 shadow-sm">
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">I am a</label>
-            <div className="mt-2 grid grid-cols-2 gap-3">
-              {(["student", "company"] as Role[]).map((r) => (
+            <div className="mt-2 grid gap-3 sm:grid-cols-3">
+              {(Object.keys(ROLE_META) as Role[]).map((r) => (
                 <button
                   type="button"
                   key={r}
@@ -45,16 +51,19 @@ function RegisterPage() {
                       : "border-border bg-background hover:border-primary/40"
                   }`}
                 >
-                  <p className="font-semibold capitalize">{r === "student" ? "Student" : "Company / SME"}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {r === "student" ? "Find internships and build your Europass CV." : "Post listings and review applicants."}
-                  </p>
+                  <p className="font-semibold">{ROLE_META[r].label}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{ROLE_META[r].hint}</p>
                 </button>
               ))}
             </div>
           </div>
 
-          <Field label={role === "company" ? "Company name" : "Full name"} value={name} onChange={setName} required />
+          <Field
+            label={role === "sme" ? "Company name" : role === "admin" ? "Administrator name" : "Full name"}
+            value={name}
+            onChange={setName}
+            required
+          />
           <Field label="Email" type="email" value={email} onChange={setEmail} required />
           <Field label="Password" type="password" value={password} onChange={setPassword} required />
 
