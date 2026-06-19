@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SmeNewListingRouteImport } from './routes/sme.new-listing'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ListingsRouteImport } from './routes/listings'
@@ -18,14 +17,10 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CvBuilderRouteImport } from './routes/cv-builder'
 import { Route as ApplicationsRouteImport } from './routes/applications'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SmeNewListingRouteImport } from './routes/sme.new-listing'
 import { Route as ListingsIdRouteImport } from './routes/listings.$id'
 import { Route as LearnIdRouteImport } from './routes/learn.$id'
 
-const SmeNewListingRoute = SmeNewListingRouteImport.update({
-  id: '/sme/new-listing',
-  path: '/sme/new-listing',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -66,6 +61,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SmeNewListingRoute = SmeNewListingRouteImport.update({
+  id: '/sme/new-listing',
+  path: '/sme/new-listing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ListingsIdRoute = ListingsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -86,9 +86,9 @@ export interface FileRoutesByFullPath {
   '/listings': typeof ListingsRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/sme/new-listing': typeof SmeNewListingRoute
   '/learn/$id': typeof LearnIdRoute
   '/listings/$id': typeof ListingsIdRoute
+  '/sme/new-listing': typeof SmeNewListingRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -99,9 +99,9 @@ export interface FileRoutesByTo {
   '/listings': typeof ListingsRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/sme/new-listing': typeof SmeNewListingRoute
   '/learn/$id': typeof LearnIdRoute
   '/listings/$id': typeof ListingsIdRoute
+  '/sme/new-listing': typeof SmeNewListingRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -113,9 +113,9 @@ export interface FileRoutesById {
   '/listings': typeof ListingsRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/sme/new-listing': typeof SmeNewListingRoute
   '/learn/$id': typeof LearnIdRoute
   '/listings/$id': typeof ListingsIdRoute
+  '/sme/new-listing': typeof SmeNewListingRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -128,9 +128,9 @@ export interface FileRouteTypes {
     | '/listings'
     | '/login'
     | '/register'
-    | '/sme/new-listing'
     | '/learn/$id'
     | '/listings/$id'
+    | '/sme/new-listing'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -141,9 +141,9 @@ export interface FileRouteTypes {
     | '/listings'
     | '/login'
     | '/register'
-    | '/sme/new-listing'
     | '/learn/$id'
     | '/listings/$id'
+    | '/sme/new-listing'
   id:
     | '__root__'
     | '/'
@@ -154,9 +154,9 @@ export interface FileRouteTypes {
     | '/listings'
     | '/login'
     | '/register'
-    | '/sme/new-listing'
     | '/learn/$id'
     | '/listings/$id'
+    | '/sme/new-listing'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -173,13 +173,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sme/new-listing': {
-      id: '/sme/new-listing'
-      path: '/sme/new-listing'
-      fullPath: '/sme/new-listing'
-      preLoaderRoute: typeof SmeNewListingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/register': {
       id: '/register'
       path: '/register'
@@ -236,6 +229,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sme/new-listing': {
+      id: '/sme/new-listing'
+      path: '/sme/new-listing'
+      fullPath: '/sme/new-listing'
+      preLoaderRoute: typeof SmeNewListingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/listings/$id': {
       id: '/listings/$id'
       path: '/$id'
@@ -253,6 +253,16 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface LearnRouteChildren {
+  LearnIdRoute: typeof LearnIdRoute
+}
+
+const LearnRouteChildren: LearnRouteChildren = {
+  LearnIdRoute: LearnIdRoute,
+}
+
+const LearnRouteWithChildren = LearnRoute._addFileChildren(LearnRouteChildren)
+
 interface ListingsRouteChildren {
   ListingsIdRoute: typeof ListingsIdRoute
 }
@@ -264,16 +274,6 @@ const ListingsRouteChildren: ListingsRouteChildren = {
 const ListingsRouteWithChildren = ListingsRoute._addFileChildren(
   ListingsRouteChildren,
 )
-
-interface LearnRouteChildren {
-  LearnIdRoute: typeof LearnIdRoute
-}
-
-const LearnRouteChildren: LearnRouteChildren = {
-  LearnIdRoute: LearnIdRoute,
-}
-
-const LearnRouteWithChildren = LearnRoute._addFileChildren(LearnRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
