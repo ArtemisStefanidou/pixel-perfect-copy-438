@@ -192,13 +192,14 @@ function SmeDashboard({ name }: { name: string }) {
 
           <aside className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
             <h2 className="font-display text-lg font-bold">Top candidates</h2>
-            <p className="mt-1 text-sm text-muted-foreground">AI-ranked by skill match.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Undergraduate students · ranked by skill match.</p>
             <ul className="mt-5 space-y-4">
               {candidates.map((c) => (
                 <li key={c.name} className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-sm font-bold">{c.name}</p>
-                    <p className="text-xs text-muted-foreground">{c.role}</p>
+                    <p className="text-xs font-medium text-primary/80">Applying for: {c.role}</p>
+                    <p className="text-xs text-muted-foreground">Undergraduate Student</p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-bold text-primary">{c.match}%</p>
