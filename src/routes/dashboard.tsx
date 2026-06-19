@@ -97,6 +97,48 @@ function StudentDashboard({ name }: { name: string }) {
             </Link>
           </aside>
         </div>
+
+        {/* Badges */}
+        <div className="mt-12">
+          <div className="flex items-end justify-between">
+            <div>
+              <h2 className="font-display text-xl font-bold">Your skill badges</h2>
+              <p className="text-sm text-muted-foreground">
+                {badges.length} of {MODULES.length} earned — complete a module to unlock a certificate.
+              </p>
+            </div>
+            <Link to="/learn" className="text-sm font-semibold text-primary">Open Academy →</Link>
+          </div>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            {MODULES.map((m) => {
+              const earned = earnedIds.has(m.id);
+              return (
+                <Link
+                  key={m.id}
+                  to="/learn/$id"
+                  params={{ id: m.id }}
+                  className={`group rounded-2xl border p-4 text-center transition-all hover:-translate-y-0.5 hover:shadow-lg ${
+                    earned ? "border-success/40 bg-success/5" : "border-border bg-surface"
+                  }`}
+                >
+                  <div
+                    className="mx-auto grid size-12 place-items-center rounded-full text-xl"
+                    style={{
+                      background: earned ? m.badgeColor : `${m.badgeColor}1A`,
+                      color: earned ? "#fff" : m.badgeColor,
+                    }}
+                  >
+                    {m.emoji}
+                  </div>
+                  <p className="mt-3 text-xs font-bold">{m.badgeName}</p>
+                  <p className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+                    {earned ? "Earned" : "Locked"}
+                  </p>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       </section>
     </PageShell>
   );
@@ -114,7 +156,7 @@ function SmeDashboard({ name }: { name: string }) {
   return (
     <PageShell>
       <section className="mx-auto max-w-7xl px-6 py-12">
-        <Header eyebrow="Company workspace" title={name} cta={{ to: "/listings", label: "+ Post new listing" }} />
+        <Header eyebrow="Company workspace" title={name} cta={{ to: "/sme/new-listing", label: "+ Post new listing" }} />
 
         <div className="mt-8 grid gap-4 md:grid-cols-4">
           <Kpi label="Active listings" value={`${myListings.length}`} hint="2 closing this month" />
