@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { PageShell } from "@/components/page-shell";
 import { useAuth } from "@/lib/auth-context";
-import { LISTINGS } from "@/lib/mock-data";
+import { LISTINGS, MODULES, useListings, useEarnedBadges } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
@@ -31,7 +31,10 @@ function Dashboard() {
 
 /* -------- Student -------- */
 function StudentDashboard({ name }: { name: string }) {
-  const recommended = LISTINGS.slice(0, 4);
+  const allListings = useListings();
+  const recommended = allListings.slice(0, 4);
+  const badges = useEarnedBadges();
+  const earnedIds = new Set(badges.map((b) => b.moduleId));
   return (
     <PageShell>
       <section className="mx-auto max-w-7xl px-6 py-12">

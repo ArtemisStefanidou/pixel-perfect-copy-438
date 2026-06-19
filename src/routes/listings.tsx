@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { PageShell } from "@/components/page-shell";
-import { LISTINGS, COUNTRIES, SECTORS, type Listing } from "@/lib/mock-data";
+import { useListings, COUNTRIES, SECTORS, type Listing } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/listings")({
   component: ListingsPage,
@@ -18,16 +18,17 @@ function ListingsPage() {
   const [country, setCountry] = useState<string>("");
   const [sector, setSector] = useState<string>("");
   const [remote, setRemote] = useState<string>("");
+  const listings = useListings();
 
   const results = useMemo(() => {
-    return LISTINGS.filter((l) => {
+    return listings.filter((l) => {
       if (q && !`${l.title} ${l.company} ${l.skills.join(" ")}`.toLowerCase().includes(q.toLowerCase())) return false;
       if (country && l.country !== country) return false;
       if (sector && l.sector !== sector) return false;
       if (remote && l.remote !== remote) return false;
       return true;
     });
-  }, [q, country, sector, remote]);
+  }, [listings, q, country, sector, remote]);
 
   return (
     <PageShell>

@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageShell } from "@/components/page-shell";
-import { LISTINGS, type Listing } from "@/lib/mock-data";
+import { getListingById, type Listing } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/listings/$id")({
   component: ListingDetail,
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/listings/$id")({
     </PageShell>
   ),
   loader: ({ params }) => {
-    const listing = LISTINGS.find((l) => l.id === params.id);
+    const listing = getListingById(params.id);
     if (!listing) throw notFound();
     return { listing };
   },

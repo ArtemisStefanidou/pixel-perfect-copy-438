@@ -26,10 +26,18 @@ export function SiteNav() {
                   <Link to="/cv-builder" className="text-muted-foreground transition-colors hover:text-primary" activeProps={{ className: "text-primary" }}>
                     CV Builder
                   </Link>
+                  <Link to="/learn" className="text-muted-foreground transition-colors hover:text-primary" activeProps={{ className: "text-primary" }}>
+                    Learn
+                  </Link>
                   <Link to="/applications" className="text-muted-foreground transition-colors hover:text-primary" activeProps={{ className: "text-primary" }}>
                     Applications
                   </Link>
                 </>
+              )}
+              {user.role === "sme" && (
+                <Link to="/sme/new-listing" className="text-muted-foreground transition-colors hover:text-primary" activeProps={{ className: "text-primary" }}>
+                  Post Listing
+                </Link>
               )}
             </>
           )}
