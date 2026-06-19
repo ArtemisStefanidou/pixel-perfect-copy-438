@@ -18,12 +18,11 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 const STORAGE_KEY = "skillsbox.session";
 
-function inferRoleFromEmail(email: string): Role {
-  const lower = email.toLowerCase();
-  if (lower.includes("admin")) return "admin";
-  if (lower.includes("sme") || lower.includes("company") || lower.includes("hr")) return "sme";
-  return "student";
-}
+const USERS: Record<string, { password: string; name: string; role: Role }> = {
+  "arben@example.com":  { password: "12345678", name: "Arben",  role: "student" },
+  "sme@example.com":    { password: "12345678", name: "SME",    role: "sme" },
+  "admin@example.com":  { password: "12345678", name: "Admin",  role: "admin" },
+};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null);
@@ -46,13 +45,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value: AuthContextValue = {
     user,
-    async login(email) {
-      const role = inferRoleFromEmail(email);
-      const u: SessionUser = {
-        email,
-        name: email.split("@")[0] || "User",
-        role,
-      };
+    async login(email, password) {
+      const account = USERS[email.toLowerCase()];
+      if (!account || account.password !== password) {
+        throw new Error("Invalid email or password");
+      }
+      const u: SessionUser = { email, name: account.name, role: account.role };
       persist(u);
       return u;
     },
