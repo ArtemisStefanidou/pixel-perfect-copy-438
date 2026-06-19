@@ -17,7 +17,7 @@ const queryClient = new QueryClient();
 const router = createRouter({
   routeTree,
   context: { queryClient },
-  basepath: "/pixel-perfect-copy-438",
+  basepath: import.meta.env.BASE_URL.replace(/\/$/, "") || "/",
   scrollRestoration: true,
   defaultPreloadStaleTime: 0,
 });
