@@ -11,7 +11,7 @@ RUN bunx vite build --config vite.cloudrun.config.ts
 # --- Runtime stage (nginx on Cloud Run) ---
 FROM nginx:1.27-alpine
 COPY --from=build /app/dist-cloudrun /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/templates/default.conf.template
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Cloud Run injects $PORT (default 8080). The nginx image's envsubst entrypoint
 # will render the template with $PORT before starting.
