@@ -1,68 +1,172 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+import type { Session, User } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 
-export type Role = "student" | "sme" | "admin";
+export type Role = "student" | "sme" | "hei_admin" | "platform_admin";
 
-export interface SessionUser {
-  email: string;
+export const ROLE_LABEL: Record<Role, string> = {
+  student: "Student",
+  sme: "Company",
+  hei_admin: "University admin",
+  platform_admin: "Platform admin",
+};
+
+export interface Profile {
+  id: string;
+  email: string | null;
+  full_name: string;
+  institution: string | null;
+  headline: string | null;
+  bio: string | null;
+  city: string | null;
+  country: string | null;
+  skills: string[];
+  avatar_url: string | null;
+}
+
+export interface Company {
+  id: string;
+  owner_id: string;
   name: string;
-  role: Role;
+  sector: string | null;
+  website: string | null;
+  description: string | null;
+  city: string | null;
+  country: string | null;
+  status: "pending" | "approved" | "rejected";
+  is_mentor: boolean;
 }
 
 interface AuthContextValue {
-  user: SessionUser | null;
-  login: (email: string, password: string) => Promise<SessionUser>;
-  register: (data: { email: string; password: string; name: string; role: Role }) => Promise<SessionUser>;
-  logout: () => void;
+  session: Session | null;
+  user: User | null;
+  profile: Profile | null;
+  company: Company | null;
+  roles: Role[];
+  role: Role | null;
+  loading: boolean;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (data: {
+    email: string;
+    password: string;
+    fullName: string;
+    role: "student" | "sme";
+    institution?: string;
+    companyName?: string;
+    sector?: string;
+  }) => Promise<{ needsEmailConfirmation: boolean }>;
+  signInWithGoogle: () => Promise<void>;
+  signOut: () => Promise<void>;
+  refresh: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
-const STORAGE_KEY = "skillsbox.session";
 
-const USERS: Record<string, { password: string; name: string; role: Role }> = {
-  "arben@example.com":  { password: "12345678", name: "Arben",  role: "student" },
-  "sme@example.com":    { password: "12345678", name: "SME",    role: "sme" },
-  "admin@example.com":  { password: "12345678", name: "Admin",  role: "admin" },
-};
+function pickPrimaryRole(roles: Role[]): Role | null {
+  const order: Role[] = ["platform_admin", "hei_admin", "sme", "student"];
+  return order.find((r) => roles.includes(r)) ?? null;
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<SessionUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [company, setCompany] = useState<Company | null>(null);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setUser(JSON.parse(raw));
-    } catch {
-      /* ignore */
+  const loadContext = useCallback(async (userId: string | undefined) => {
+    if (!userId) {
+      setProfile(null);
+      setCompany(null);
+      setRoles([]);
+      return;
     }
+    const [profileRes, rolesRes, companyRes] = await Promise.all([
+      supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
+      supabase.from("user_roles").select("role").eq("user_id", userId),
+      supabase.from("companies").select("*").eq("owner_id", userId).maybeSingle(),
+    ]);
+    setProfile((profileRes.data as Profile | null) ?? null);
+    setRoles(((rolesRes.data ?? []) as { role: Role }[]).map((r) => r.role));
+    setCompany((companyRes.data as Company | null) ?? null);
   }, []);
 
-  const persist = (u: SessionUser | null) => {
-    setUser(u);
-    if (typeof window === "undefined") return;
-    if (u) localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
-    else localStorage.removeItem(STORAGE_KEY);
-  };
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession);
+      setTimeout(() => {
+        void loadContext(nextSession?.user?.id).finally(() => setLoading(false));
+      }, 0);
+    });
 
-  const value: AuthContextValue = {
-    user,
-    async login(email, password) {
-      const account = USERS[email.toLowerCase()];
-      if (!account || account.password !== password) {
-        throw new Error("Invalid email or password");
-      }
-      const u: SessionUser = { email, name: account.name, role: account.role };
-      persist(u);
-      return u;
-    },
-    async register({ email, name, role }) {
-      const u: SessionUser = { email, name, role };
-      persist(u);
-      return u;
-    },
-    logout() {
-      persist(null);
-    },
-  };
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      void loadContext(data.session?.user?.id).finally(() => setLoading(false));
+    });
+
+    return () => sub.subscription.unsubscribe();
+  }, [loadContext]);
+
+  const refresh = useCallback(async () => {
+    await loadContext(session?.user?.id);
+  }, [loadContext, session?.user?.id]);
+
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      session,
+      user: session?.user ?? null,
+      profile,
+      company,
+      roles,
+      role: pickPrimaryRole(roles),
+      loading,
+      async signIn(email, password) {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+      },
+      async signUp({ email, password, fullName, role, institution, companyName, sector }) {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/dashboard`,
+            data: {
+              full_name: fullName,
+              role,
+              institution: institution ?? null,
+              company_name: companyName ?? null,
+              sector: sector ?? null,
+            },
+          },
+        });
+        if (error) throw error;
+        return { needsEmailConfirmation: !data.session };
+      },
+      async signInWithGoogle() {
+        const { lovable } = await import("@/integrations/lovable/index");
+        const result = await lovable.auth.signInWithOAuth("google", {
+          redirect_uri: window.location.origin,
+        });
+        if (result.error) throw new Error(result.error.message ?? "Google sign-in failed");
+      },
+      async signOut() {
+        await supabase.auth.signOut();
+        setProfile(null);
+        setCompany(null);
+        setRoles([]);
+      },
+      refresh,
+    }),
+    [session, profile, company, roles, loading, refresh],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
