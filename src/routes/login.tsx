@@ -9,7 +9,7 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-  const { login } = useAuth();
+  const { signIn, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,12 +21,21 @@ function LoginPage() {
     setLoading(true);
     setError("");
     try {
-      await login(email, password);
+      await signIn(email, password);
       navigate({ to: "/dashboard" });
-    } catch {
-      setError("Invalid email or password.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Invalid email or password.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function onGoogle() {
+    setError("");
+    try {
+      await signInWithGoogle();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Google sign-in failed.");
     }
   }
 
@@ -39,7 +48,7 @@ function LoginPage() {
         <form onSubmit={onSubmit} className="mt-10 space-y-5 rounded-2xl border border-border bg-surface p-8 shadow-sm">
           <Field label="Email" type="email" value={email} onChange={setEmail} required />
           <Field label="Password" type="password" value={password} onChange={setPassword} required />
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && <p className="text-sm text-destructive">{error}</p>}
           <button
             type="submit"
             disabled={loading}
@@ -47,10 +56,20 @@ function LoginPage() {
           >
             {loading ? "Signing in..." : "Sign in"}
           </button>
-          <div className="flex justify-between text-sm">
-            <a href="#" className="text-muted-foreground hover:text-primary">
-              Forgot password?
-            </a>
+
+          <div className="flex items-center gap-3 text-xs uppercase tracking-wider text-muted-foreground">
+            <span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" />
+          </div>
+
+          <button
+            type="button"
+            onClick={onGoogle}
+            className="w-full rounded-xl border border-border bg-background px-5 py-3 text-sm font-semibold transition-colors hover:bg-secondary"
+          >
+            Continue with Google
+          </button>
+
+          <div className="flex justify-end text-sm">
             <Link to="/register" className="font-semibold text-primary">
               Create account
             </Link>
