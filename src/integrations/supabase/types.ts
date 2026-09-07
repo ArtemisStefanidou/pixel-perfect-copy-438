@@ -14,16 +14,247 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      applications: {
+        Row: {
+          cover_note: string | null
+          created_at: string
+          id: string
+          listing_id: string
+          status: Database["public"]["Enums"]["application_status"]
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          cover_note?: string | null
+          created_at?: string
+          id?: string
+          listing_id: string
+          status?: Database["public"]["Enums"]["application_status"]
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          cover_note?: string | null
+          created_at?: string
+          id?: string
+          listing_id?: string
+          status?: Database["public"]["Enums"]["application_status"]
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      companies: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_mentor: boolean
+          logo_url: string | null
+          name: string
+          owner_id: string
+          sector: string | null
+          status: Database["public"]["Enums"]["company_status"]
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_mentor?: boolean
+          logo_url?: string | null
+          name: string
+          owner_id: string
+          sector?: string | null
+          status?: Database["public"]["Enums"]["company_status"]
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_mentor?: boolean
+          logo_url?: string | null
+          name?: string
+          owner_id?: string
+          sector?: string | null
+          status?: Database["public"]["Enums"]["company_status"]
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      listings: {
+        Row: {
+          city: string | null
+          company_id: string
+          country: string | null
+          created_at: string
+          deadline: string | null
+          description: string
+          duration: string | null
+          id: string
+          listing_type: string
+          owner_id: string
+          required_skills: string[]
+          sector: string | null
+          status: Database["public"]["Enums"]["listing_status"]
+          title: string
+          updated_at: string
+          work_mode: string
+        }
+        Insert: {
+          city?: string | null
+          company_id: string
+          country?: string | null
+          created_at?: string
+          deadline?: string | null
+          description?: string
+          duration?: string | null
+          id?: string
+          listing_type?: string
+          owner_id: string
+          required_skills?: string[]
+          sector?: string | null
+          status?: Database["public"]["Enums"]["listing_status"]
+          title: string
+          updated_at?: string
+          work_mode?: string
+        }
+        Update: {
+          city?: string | null
+          company_id?: string
+          country?: string | null
+          created_at?: string
+          deadline?: string | null
+          description?: string
+          duration?: string | null
+          id?: string
+          listing_type?: string
+          owner_id?: string
+          required_skills?: string[]
+          sector?: string | null
+          status?: Database["public"]["Enums"]["listing_status"]
+          title?: string
+          updated_at?: string
+          work_mode?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          headline: string | null
+          id: string
+          institution: string | null
+          skills: string[]
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          headline?: string | null
+          id: string
+          institution?: string | null
+          skills?: string[]
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          headline?: string | null
+          id?: string
+          institution?: string | null
+          skills?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_approved_company: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "student" | "sme" | "hei_admin" | "platform_admin"
+      application_status:
+        | "submitted"
+        | "reviewed"
+        | "interview"
+        | "accepted"
+        | "rejected"
+      company_status: "pending" | "approved" | "rejected"
+      listing_status: "active" | "closed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +381,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["student", "sme", "hei_admin", "platform_admin"],
+      application_status: [
+        "submitted",
+        "reviewed",
+        "interview",
+        "accepted",
+        "rejected",
+      ],
+      company_status: ["pending", "approved", "rejected"],
+      listing_status: ["active", "closed"],
+    },
   },
 } as const
