@@ -1,32 +1,42 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { PageShell } from "@/components/page-shell";
-import { LISTINGS, type Listing } from "@/lib/mock-data";
+import { useAuth } from "@/lib/auth-context";
+import { fetchMyApplications, statusTone, type ApplicationRow } from "@/lib/listings-db";
 
 export const Route = createFileRoute("/applications")({
   component: ApplicationsPage,
-  head: () => ({ meta: [{ title: "My applications — SkillsBox" }] }),
+  head: () => ({
+    meta: [
+      { title: "My applications — SkillsBox" },
+      { name: "description", content: "Track the status of every internship and job you applied to on SkillsBox." },
+      { property: "og:title", content: "My applications — SkillsBox" },
+      { property: "og:description", content: "Track the status of every internship and job you applied to." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
 });
 
-interface AppRecord {
-  listingId: string;
-  date: string;
-  status: "pending" | "accepted" | "rejected";
-}
-
 function ApplicationsPage() {
-  const [apps, setApps] = useState<AppRecord[]>([]);
+  const { user, loading } = useAuth();
+  const [apps, setApps] = useState<ApplicationRow[]>([]);
+  const [busy, setBusy] = useState(true);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("skillsbox.applications");
-      if (raw) setApps(JSON.parse(raw));
-    } catch {/* ignore */}
-  }, []);
-
-  const enriched = apps
-    .map((a) => ({ app: a, listing: LISTINGS.find((l) => l.id === a.listingId) }))
-    .filter((x): x is { app: AppRecord; listing: Listing } => !!x.listing);
+    if (loading) return;
+    if (!user) {
+      setBusy(false);
+      return;
+    }
+    let alive = true;
+    fetchMyApplications(user.id)
+      .then((d) => alive && setApps(d))
+      .finally(() => alive && setBusy(false));
+    return () => {
+      alive = false;
+    };
+  }, [user, loading]);
 
   return (
     <PageShell>
@@ -35,48 +45,46 @@ function ApplicationsPage() {
         <p className="mt-2 text-muted-foreground">Track the status of every listing you've applied to.</p>
 
         <div className="mt-8 space-y-3">
-          {enriched.length === 0 && (
+          {busy && <p className="text-muted-foreground">Loading…</p>}
+
+          {!busy && !user && (
             <div className="rounded-2xl border border-dashed border-border bg-surface p-12 text-center">
-              <p className="text-muted-foreground">You haven't applied to any listings yet.</p>
-              <Link to="/listings" className="mt-3 inline-block font-semibold text-primary">Browse listings →</Link>
+              <p className="text-muted-foreground">Sign in to see your applications.</p>
+              <Link to="/login" className="mt-3 inline-block font-semibold text-primary">
+                Sign in →
+              </Link>
             </div>
           )}
 
-          {enriched.map(({ app, listing }) => (
+          {!busy && user && apps.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-border bg-surface p-12 text-center">
+              <p className="text-muted-foreground">You haven't applied to any listings yet.</p>
+              <Link to="/listings" className="mt-3 inline-block font-semibold text-primary">
+                Browse listings →
+              </Link>
+            </div>
+          )}
+
+          {apps.map((a) => (
             <Link
-              key={listing.id}
+              key={a.id}
               to="/listings/$id"
-              params={{ id: listing.id }}
+              params={{ id: a.listing_id }}
               className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-surface p-5 transition-colors hover:border-primary"
             >
-              <div className="flex items-center gap-4">
-                <div className="grid size-12 place-items-center rounded-xl border border-border bg-background text-xl">{listing.emoji}</div>
-                <div>
-                  <p className="font-bold">{listing.title}</p>
-                  <p className="text-sm text-muted-foreground">{listing.company} • {listing.city}</p>
-                </div>
+              <div>
+                <p className="font-bold">{a.listings?.title ?? "Listing"}</p>
+                <p className="text-sm text-muted-foreground">
+                  {a.listings?.companies?.name ?? ""} • applied {new Date(a.created_at).toLocaleDateString()}
+                </p>
               </div>
-              <div className="flex items-center gap-4 text-sm">
-                <span className="text-muted-foreground">{new Date(app.date).toLocaleDateString()}</span>
-                <StatusBadge status={app.status} />
-              </div>
+              <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${statusTone(a.status)}`}>
+                {a.status}
+              </span>
             </Link>
           ))}
         </div>
       </section>
     </PageShell>
-  );
-}
-
-function StatusBadge({ status }: { status: AppRecord["status"] }) {
-  const map = {
-    pending: "bg-warning/10 text-warning",
-    accepted: "bg-success/10 text-success",
-    rejected: "bg-destructive/10 text-destructive",
-  } as const;
-  return (
-    <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase ${map[status]}`}>
-      {status}
-    </span>
   );
 }
