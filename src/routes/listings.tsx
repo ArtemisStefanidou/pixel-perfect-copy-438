@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PageShell } from "@/components/page-shell";
-import { useListings, COUNTRIES, SECTORS, type Listing } from "@/lib/mock-data";
+import { useAuth } from "@/lib/auth-context";
+import { COUNTRIES, SECTORS, WORK_MODES, fetchListings, type ListingRow } from "@/lib/listings-db";
 
 export const Route = createFileRoute("/listings")({
   component: ListingsPage,
@@ -9,26 +10,74 @@ export const Route = createFileRoute("/listings")({
     meta: [
       { title: "Internships & Listings — SkillsBox" },
       { name: "description", content: "Browse internships and SME opportunities across the Western Balkans." },
+      { property: "og:title", content: "Internships & Listings — SkillsBox" },
+      { property: "og:description", content: "Browse internships and SME opportunities across the Western Balkans." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
 });
 
 function ListingsPage() {
+  const { user, loading } = useAuth();
   const [q, setQ] = useState("");
-  const [country, setCountry] = useState<string>("");
-  const [sector, setSector] = useState<string>("");
-  const [remote, setRemote] = useState<string>("");
-  const listings = useListings();
+  const [country, setCountry] = useState("");
+  const [sector, setSector] = useState("");
+  const [mode, setMode] = useState("");
+  const [rows, setRows] = useState<ListingRow[]>([]);
+  const [busy, setBusy] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const results = useMemo(() => {
-    return listings.filter((l) => {
-      if (q && !`${l.title} ${l.company} ${l.skills.join(" ")}`.toLowerCase().includes(q.toLowerCase())) return false;
-      if (country && l.country !== country) return false;
-      if (sector && l.sector !== sector) return false;
-      if (remote && l.remote !== remote) return false;
-      return true;
-    });
-  }, [listings, q, country, sector, remote]);
+  useEffect(() => {
+    if (loading) return;
+    if (!user) {
+      setBusy(false);
+      return;
+    }
+    let alive = true;
+    setBusy(true);
+    fetchListings()
+      .then((d) => alive && setRows(d))
+      .catch((e) => alive && setError(e.message ?? "Could not load listings"))
+      .finally(() => alive && setBusy(false));
+    return () => {
+      alive = false;
+    };
+  }, [user, loading]);
+
+  const results = useMemo(
+    () =>
+      rows.filter((l) => {
+        const hay = `${l.title} ${l.companies?.name ?? ""} ${l.required_skills.join(" ")}`.toLowerCase();
+        if (q && !hay.includes(q.toLowerCase())) return false;
+        if (country && l.country !== country) return false;
+        if (sector && l.sector !== sector) return false;
+        if (mode && l.work_mode !== mode) return false;
+        return true;
+      }),
+    [rows, q, country, sector, mode],
+  );
+
+  if (!loading && !user) {
+    return (
+      <PageShell>
+        <section className="mx-auto max-w-3xl px-6 py-32 text-center">
+          <h1 className="font-display text-3xl font-bold">Sign in to browse opportunities</h1>
+          <p className="mt-3 text-muted-foreground">
+            Listings from verified companies are visible to registered members.
+          </p>
+          <div className="mt-6 flex justify-center gap-3">
+            <Link to="/login" className="rounded-xl border border-border bg-surface px-5 py-3 text-sm font-semibold">
+              Sign in
+            </Link>
+            <Link to="/register" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground">
+              Create account
+            </Link>
+          </div>
+        </section>
+      </PageShell>
+    );
+  }
 
   return (
     <PageShell>
@@ -36,7 +85,9 @@ function ListingsPage() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="font-display text-3xl font-bold">Explore Internships</h1>
-            <p className="mt-2 text-muted-foreground">{results.length} positions across the Western Balkans 6</p>
+            <p className="mt-2 text-muted-foreground">
+              {busy ? "Loading opportunities…" : `${results.length} positions across the Western Balkans 6`}
+            </p>
           </div>
           <input
             type="search"
@@ -47,28 +98,33 @@ function ListingsPage() {
           />
         </div>
 
+        {error && <p className="mt-6 rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{error}</p>}
+
         <div className="mt-8 grid gap-8 lg:grid-cols-[260px_1fr]">
-          {/* Filters */}
           <aside className="space-y-6 rounded-2xl border border-border bg-surface p-6 lg:sticky lg:top-24 lg:self-start">
             <FilterGroup label="Country" value={country} onChange={setCountry} options={COUNTRIES} />
             <FilterGroup label="Sector" value={sector} onChange={setSector} options={SECTORS} />
-            <FilterGroup label="Work mode" value={remote} onChange={setRemote} options={["Remote", "On-site", "Hybrid"]} />
+            <FilterGroup label="Work mode" value={mode} onChange={setMode} options={WORK_MODES} />
             <button
-              onClick={() => { setCountry(""); setSector(""); setRemote(""); setQ(""); }}
+              onClick={() => {
+                setCountry("");
+                setSector("");
+                setMode("");
+                setQ("");
+              }}
               className="w-full rounded-lg border border-border bg-background py-2 text-xs font-semibold text-muted-foreground hover:text-primary"
             >
               Clear filters
             </button>
           </aside>
 
-          {/* Cards */}
           <div className="grid gap-6 md:grid-cols-2">
             {results.map((l) => (
               <Card key={l.id} l={l} />
             ))}
-            {results.length === 0 && (
+            {!busy && results.length === 0 && (
               <div className="col-span-full rounded-2xl border border-dashed border-border bg-surface p-12 text-center text-muted-foreground">
-                No listings match your filters.
+                No listings match your filters yet.
               </div>
             )}
           </div>
@@ -78,7 +134,17 @@ function ListingsPage() {
   );
 }
 
-function FilterGroup({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: string[] }) {
+function FilterGroup({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+}) {
   return (
     <div>
       <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
@@ -107,7 +173,8 @@ function FilterGroup({ label, value, onChange, options }: { label: string; value
   );
 }
 
-function Card({ l }: { l: Listing }) {
+export function Card({ l }: { l: ListingRow }) {
+  const days = Math.max(0, Math.round((Date.now() - new Date(l.created_at).getTime()) / 86400000));
   return (
     <Link
       to="/listings/$id"
@@ -115,22 +182,28 @@ function Card({ l }: { l: Listing }) {
       className="group rounded-2xl border border-border bg-surface p-6 transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-xl"
     >
       <div className="mb-4 flex items-center justify-between">
-        <div className="grid size-12 place-items-center rounded-xl border border-border bg-background text-xl">{l.emoji}</div>
-        {l.closingSoon ? (
-          <span className="rounded-full bg-warning/10 px-3 py-1 text-[10px] font-bold uppercase text-warning">Closing Soon</span>
-        ) : (
-          <span className="rounded-full bg-success/10 px-3 py-1 text-[10px] font-bold uppercase text-success">Active</span>
-        )}
+        <div className="grid size-12 place-items-center rounded-xl border border-border bg-background text-sm font-bold">
+          {(l.companies?.name ?? "?").slice(0, 2).toUpperCase()}
+        </div>
+        <span
+          className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase ${
+            l.status === "active" ? "bg-success/10 text-success" : "bg-secondary text-muted-foreground"
+          }`}
+        >
+          {l.status}
+        </span>
       </div>
       <h3 className="text-lg font-bold group-hover:text-primary">{l.title}</h3>
-      <p className="text-sm font-medium text-muted-foreground">{l.company} • {l.city}, {l.country}</p>
+      <p className="text-sm font-medium text-muted-foreground">
+        {l.companies?.name ?? "Company"} • {[l.city, l.country].filter(Boolean).join(", ")}
+      </p>
       <div className="mt-6 flex flex-wrap gap-2">
-        <span className="rounded bg-secondary px-2 py-1 text-[10px] font-semibold">{l.remote}</span>
-        <span className="rounded bg-secondary px-2 py-1 text-[10px] font-semibold">{l.duration}</span>
-        <span className="rounded bg-secondary px-2 py-1 text-[10px] font-semibold">{l.sector}</span>
+        <span className="rounded bg-secondary px-2 py-1 text-[10px] font-semibold">{l.work_mode}</span>
+        {l.duration && <span className="rounded bg-secondary px-2 py-1 text-[10px] font-semibold">{l.duration}</span>}
+        {l.sector && <span className="rounded bg-secondary px-2 py-1 text-[10px] font-semibold">{l.sector}</span>}
       </div>
       <div className="mt-6 flex items-center justify-between border-t border-border/60 pt-4">
-        <span className="text-xs font-medium text-muted-foreground">Posted {l.postedDaysAgo}d ago</span>
+        <span className="text-xs font-medium text-muted-foreground">Posted {days}d ago</span>
         <span className="text-sm font-bold text-primary">View →</span>
       </div>
     </Link>
