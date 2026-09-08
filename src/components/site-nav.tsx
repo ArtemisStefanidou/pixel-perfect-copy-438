@@ -1,8 +1,16 @@
-import { Link } from "@tanstack/react-router";
-import { useAuth } from "@/lib/auth-context";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useAuth, ROLE_LABEL } from "@/lib/auth-context";
 
 export function SiteNav() {
-  const { user, logout } = useAuth();
+  const { user, profile, role, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  async function handleSignOut() {
+    await signOut();
+    navigate({ to: "/login", replace: true });
+  }
+
+  const linkCls = "text-muted-foreground transition-colors hover:text-primary";
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
@@ -12,48 +20,55 @@ export function SiteNav() {
           <span className="font-display text-xl font-bold tracking-tight">SkillsBox</span>
         </Link>
 
-        <div className="hidden items-center gap-8 text-sm font-medium md:flex">
-          <Link to="/listings" className="text-muted-foreground transition-colors hover:text-primary" activeProps={{ className: "text-primary" }}>
+        <div className="hidden items-center gap-6 text-sm font-medium md:flex">
+          <Link to="/listings" className={linkCls} activeProps={{ className: "text-primary" }}>
             Listings
           </Link>
           {user && (
             <>
-              <Link to="/dashboard" className="text-muted-foreground transition-colors hover:text-primary" activeProps={{ className: "text-primary" }}>
+              <Link to="/dashboard" className={linkCls} activeProps={{ className: "text-primary" }}>
                 Dashboard
               </Link>
-              {user.role === "student" && (
+              {role === "student" && (
                 <>
-                  <Link to="/cv-builder" className="text-muted-foreground transition-colors hover:text-primary" activeProps={{ className: "text-primary" }}>
+                  <Link to="/cv-builder" className={linkCls} activeProps={{ className: "text-primary" }}>
                     CV Builder
                   </Link>
-                  <Link to="/learn" className="text-muted-foreground transition-colors hover:text-primary" activeProps={{ className: "text-primary" }}>
+                  <Link to="/learn" className={linkCls} activeProps={{ className: "text-primary" }}>
                     Learn
                   </Link>
-                  <Link to="/applications" className="text-muted-foreground transition-colors hover:text-primary" activeProps={{ className: "text-primary" }}>
+                  <Link to="/applications" className={linkCls} activeProps={{ className: "text-primary" }}>
                     Applications
                   </Link>
                 </>
               )}
-              {user.role === "sme" && (
-                <Link to="/sme/new-listing" className="text-muted-foreground transition-colors hover:text-primary" activeProps={{ className: "text-primary" }}>
+              {role === "sme" && (
+                <Link to="/sme/new-listing" className={linkCls} activeProps={{ className: "text-primary" }}>
                   Post Listing
                 </Link>
               )}
+              {(role === "platform_admin" || role === "hei_admin") && (
+                <Link to="/admin" className={linkCls} activeProps={{ className: "text-primary" }}>
+                  Administration
+                </Link>
+              )}
+              {role && (
+                <span className="rounded-full border border-border bg-secondary/60 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  {ROLE_LABEL[role]}
+                </span>
+              )}
             </>
-          )}
-          {user && (
-            <span className="rounded-full border border-border bg-secondary/60 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              {user.role}
-            </span>
           )}
         </div>
 
         <div className="flex items-center gap-3">
           {user ? (
             <>
-              <span className="hidden text-sm text-muted-foreground sm:inline">{user.name}</span>
+              <span className="hidden text-sm text-muted-foreground sm:inline">
+                {profile?.full_name || user.email}
+              </span>
               <button
-                onClick={logout}
+                onClick={handleSignOut}
                 className="rounded-full border border-border bg-surface px-4 py-2 text-sm font-semibold transition-colors hover:bg-secondary"
               >
                 Sign out
