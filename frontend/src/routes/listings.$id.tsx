@@ -9,7 +9,7 @@ import {
   statusTone,
   type ApplicationRow,
   type ListingRow,
-} from "@/lib/listings-db";
+} from "@/lib/api-client";
 
 export const Route = createFileRoute("/listings/$id")({
   component: ListingDetail,

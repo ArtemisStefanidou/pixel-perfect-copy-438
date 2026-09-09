@@ -9,6 +9,7 @@ import {
 } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchMe } from "@/lib/api-client";
 
 export type Role = "student" | "sme" | "hei_admin" | "platform_admin";
 
@@ -89,14 +90,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setRoles([]);
       return;
     }
-    const [profileRes, rolesRes, companyRes] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
-      supabase.from("user_roles").select("role").eq("user_id", userId),
-      supabase.from("companies").select("*").eq("owner_id", userId).maybeSingle(),
-    ]);
-    setProfile((profileRes.data as Profile | null) ?? null);
-    setRoles(((rolesRes.data ?? []) as { role: Role }[]).map((r) => r.role));
-    setCompany((companyRes.data as Company | null) ?? null);
+    const { profile: nextProfile, roles: nextRoles, company: nextCompany } = await fetchMe();
+    setProfile(nextProfile);
+    setRoles(nextRoles);
+    setCompany(nextCompany);
   }, []);
 
   useEffect(() => {

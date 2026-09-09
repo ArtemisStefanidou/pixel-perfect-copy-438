@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { PageShell } from "@/components/page-shell";
 import { useAuth } from "@/lib/auth-context";
-import { SECTORS } from "@/lib/listings-db";
+import { SECTORS } from "@/lib/api-client";
 
 export const Route = createFileRoute("/register")({
   component: RegisterPage,

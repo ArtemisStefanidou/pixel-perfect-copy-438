@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { PageShell } from "@/components/page-shell";
 import { useAuth } from "@/lib/auth-context";
-import { fetchMyApplications, statusTone, type ApplicationRow } from "@/lib/listings-db";
+import { fetchMyApplications, statusTone, type ApplicationRow } from "@/lib/api-client";
 
 export const Route = createFileRoute("/applications")({
   component: ApplicationsPage,

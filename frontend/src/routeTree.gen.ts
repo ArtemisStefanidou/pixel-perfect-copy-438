@@ -9,46 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as RegisterRouteImport } from './routes/register'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as ListingsRouteImport } from './routes/listings'
-import { Route as LearnRouteImport } from './routes/learn'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as CvBuilderRouteImport } from './routes/cv-builder'
-import { Route as ApplicationsRouteImport } from './routes/applications'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as SmeNewListingRouteImport } from './routes/sme.new-listing'
-import { Route as ListingsIdRouteImport } from './routes/listings.$id'
+import { Route as ApplicationsRouteImport } from './routes/applications'
+import { Route as CvBuilderRouteImport } from './routes/cv-builder'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as LearnRouteImport } from './routes/learn'
+import { Route as ListingsRouteImport } from './routes/listings'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LearnIdRouteImport } from './routes/learn.$id'
+import { Route as ListingsIdRouteImport } from './routes/listings.$id'
+import { Route as SmeNewListingRouteImport } from './routes/sme.new-listing'
 
-const RegisterRoute = RegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ListingsRoute = ListingsRouteImport.update({
-  id: '/listings',
-  path: '/listings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LearnRoute = LearnRouteImport.update({
-  id: '/learn',
-  path: '/learn',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CvBuilderRoute = CvBuilderRouteImport.update({
-  id: '/cv-builder',
-  path: '/cv-builder',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApplicationsRoute = ApplicationsRouteImport.update({
@@ -56,25 +31,50 @@ const ApplicationsRoute = ApplicationsRouteImport.update({
   path: '/applications',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const CvBuilderRoute = CvBuilderRouteImport.update({
+  id: '/cv-builder',
+  path: '/cv-builder',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SmeNewListingRoute = SmeNewListingRouteImport.update({
-  id: '/sme/new-listing',
-  path: '/sme/new-listing',
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
+} as any)
+const LearnRoute = LearnRouteImport.update({
+  id: '/learn',
+  path: '/learn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ListingsRoute = ListingsRouteImport.update({
+  id: '/listings',
+  path: '/listings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearnIdRoute = LearnIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => LearnRoute,
 } as any)
 const ListingsIdRoute = ListingsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => ListingsRoute,
 } as any)
-const LearnIdRoute = LearnIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => LearnRoute,
+const SmeNewListingRoute = SmeNewListingRouteImport.update({
+  id: '/sme/new-listing',
+  path: '/sme/new-listing',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -173,46 +173,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/register': {
-      id: '/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/listings': {
-      id: '/listings'
-      path: '/listings'
-      fullPath: '/listings'
-      preLoaderRoute: typeof ListingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/learn': {
-      id: '/learn'
-      path: '/learn'
-      fullPath: '/learn'
-      preLoaderRoute: typeof LearnRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cv-builder': {
-      id: '/cv-builder'
-      path: '/cv-builder'
-      fullPath: '/cv-builder'
-      preLoaderRoute: typeof CvBuilderRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/applications': {
@@ -222,19 +187,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApplicationsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/cv-builder': {
+      id: '/cv-builder'
+      path: '/cv-builder'
+      fullPath: '/cv-builder'
+      preLoaderRoute: typeof CvBuilderRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sme/new-listing': {
-      id: '/sme/new-listing'
-      path: '/sme/new-listing'
-      fullPath: '/sme/new-listing'
-      preLoaderRoute: typeof SmeNewListingRouteImport
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/learn': {
+      id: '/learn'
+      path: '/learn'
+      fullPath: '/learn'
+      preLoaderRoute: typeof LearnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/listings': {
+      id: '/listings'
+      path: '/listings'
+      fullPath: '/listings'
+      preLoaderRoute: typeof ListingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn/$id': {
+      id: '/learn/$id'
+      path: '/$id'
+      fullPath: '/learn/$id'
+      preLoaderRoute: typeof LearnIdRouteImport
+      parentRoute: typeof LearnRoute
     }
     '/listings/$id': {
       id: '/listings/$id'
@@ -243,12 +243,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ListingsIdRouteImport
       parentRoute: typeof ListingsRoute
     }
-    '/learn/$id': {
-      id: '/learn/$id'
-      path: '/$id'
-      fullPath: '/learn/$id'
-      preLoaderRoute: typeof LearnIdRouteImport
-      parentRoute: typeof LearnRoute
+    '/sme/new-listing': {
+      id: '/sme/new-listing'
+      path: '/sme/new-listing'
+      fullPath: '/sme/new-listing'
+      preLoaderRoute: typeof SmeNewListingRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }

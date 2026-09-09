@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { PageShell } from "@/components/page-shell";
 import { useAuth } from "@/lib/auth-context";
-import { COUNTRIES, LISTING_TYPES, SECTORS, WORK_MODES, createListing } from "@/lib/listings-db";
+import { COUNTRIES, LISTING_TYPES, SECTORS, WORK_MODES, createListing } from "@/lib/api-client";
 
 export const Route = createFileRoute("/sme/new-listing")({
   component: NewListingPage,

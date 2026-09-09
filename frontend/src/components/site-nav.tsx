@@ -31,25 +31,32 @@ export function SiteNav() {
               </Link>
               {role === "student" && (
                 <>
-                  <Link to="/cv-builder" className={linkCls} activeProps={{ className: "text-primary" }}>
+                  <Link
+                    to="/cv-builder"
+                    className={linkCls}
+                    activeProps={{ className: "text-primary" }}
+                  >
                     CV Builder
                   </Link>
                   <Link to="/learn" className={linkCls} activeProps={{ className: "text-primary" }}>
                     Learn
                   </Link>
-                  <Link to="/applications" className={linkCls} activeProps={{ className: "text-primary" }}>
+                  <Link
+                    to="/applications"
+                    className={linkCls}
+                    activeProps={{ className: "text-primary" }}
+                  >
                     Applications
                   </Link>
                 </>
               )}
               {role === "sme" && (
-                <Link to="/sme/new-listing" className={linkCls} activeProps={{ className: "text-primary" }}>
+                <Link
+                  to="/sme/new-listing"
+                  className={linkCls}
+                  activeProps={{ className: "text-primary" }}
+                >
                   Post Listing
-                </Link>
-              )}
-              {(role === "platform_admin" || role === "hei_admin") && (
-                <Link to="/admin" className={linkCls} activeProps={{ className: "text-primary" }}>
-                  Administration
                 </Link>
               )}
               {role && (

@@ -20,6 +20,9 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
 
@@ -35,7 +38,7 @@ jobs:
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist-spa
+          path: frontend/dist-spa
 
       - uses: actions/deploy-pages@v4
         id: deployment
